@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>How it works — Read Laterally</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pine:#16261F; --pine2:#1E332B;
+    --paper:#F7F5EE; --ink:#20302B;
+    --teal:#3E7C74; --teal-d:#2f5f59; --teal-br:#5BB39E;
+    --sage:#9FC0B4; --mist:#EAF1ED;
+    --gold:#E7B15A; --gold-d:#231a08;
+    --line:#DDE4DF; --quiet:#66756F; --warm:#A9584F;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0; background:var(--paper); color:var(--ink);
+    font-family:"Inter",system-ui,sans-serif; line-height:1.6; font-size:17px;}
+  .wrap{max-width:720px; margin:0 auto; padding:0 24px;}
+
+  /* ---- slim header ---- */
+  .topbar{background:var(--pine); color:var(--paper); padding:20px 0;}
+  .topbar .wrap{display:flex; align-items:center; justify-content:space-between;}
+  .brand{display:flex; align-items:center; gap:9px; font-size:14px; font-weight:600; color:var(--paper); text-decoration:none;}
+  .back{font-size:13px; color:var(--sage); text-decoration:none;}
+  .back:hover{color:var(--paper);}
+
+  /* ---- hero ---- */
+  .hero{background:
+      radial-gradient(120% 90% at 82% 0%, rgba(91,179,158,.14), transparent 55%),
+      var(--pine); color:var(--paper); padding:14px 0 56px;}
+  .eyebrow{font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--sage); margin-bottom:18px;}
+  h1{font-family:"Fraunces",serif; font-weight:900; font-size:clamp(34px,6vw,56px); line-height:1.02; letter-spacing:-.015em; margin:0 0 18px;}
+  h1 .lat{font-style:italic; font-weight:600; color:var(--gold);}
+  .hero .lede{font-size:clamp(16px,1.9vw,18px); color:var(--sage); max-width:52ch; margin:0;}
+  .hero .lede b{color:var(--paper); font-weight:600;}
+
+  /* ---- sections ---- */
+  .section{padding:52px 0;}
+  .section + .section{border-top:1px solid var(--line);}
+  .kicker{font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--teal); margin:0 0 10px;}
+  h2{font-family:"Fraunces",serif; font-weight:600; font-size:clamp(25px,3.6vw,32px); line-height:1.14; margin:0 0 16px; letter-spacing:-.01em;}
+  h2.mb{margin-bottom:26px;}
+  p.body{font-size:16.5px; margin:0 0 16px;}
+  p.body b{font-weight:600;}
+  .lead-line{font-size:19px; line-height:1.5; color:var(--ink); font-weight:500; margin:0 0 20px;}
+
+  .callout{background:var(--mist); border-radius:12px; padding:18px 20px; margin:22px 0; font-size:15.5px;}
+  .callout b{color:var(--teal-d);}
+
+  /* ---- tiers ---- */
+  .tiers{position:relative; padding-left:34px; margin-top:8px;}
+  .tiers::before{content:""; position:absolute; left:13px; top:8px; bottom:8px; width:2px; background:var(--line);}
+  .tier{position:relative; margin-bottom:30px;}
+  .tier:last-child{margin-bottom:0;}
+  .tier .node{position:absolute; left:-34px; top:0; width:28px; height:28px; border-radius:50%;
+    background:#fff; border:2px solid var(--teal); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; color:var(--teal-d);}
+  .tier.deep .node{border-color:var(--gold); color:#9a6b1e;}
+  .tier .secs{font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--teal); margin:0 0 3px;}
+  .tier.deep .secs{color:#9a6b1e;}
+  .tier h3{font-family:"Fraunces",serif; font-weight:600; font-size:20px; margin:0 0 6px;}
+  .tier p{margin:0; font-size:15.5px; color:var(--quiet);}
+  .tier p + p{margin-top:8px;}
+
+  /* ---- case file ---- */
+  .casefile{border:1px solid var(--line); border-radius:14px; overflow:hidden; background:#fff; margin-top:8px;}
+  .cf-head{background:var(--pine); color:var(--paper); padding:11px 16px; display:flex; align-items:center; justify-content:space-between;
+    font-size:11px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;}
+  .cf-head .cf-tag{display:flex; align-items:center; gap:8px; color:var(--sage);}
+  .cf-body{padding:18px 20px;}
+  .cf-claim{font-family:"Fraunces",serif; font-weight:600; font-size:18px; line-height:1.32; margin:0 0 16px;}
+  .cf-step{display:grid; grid-template-columns:auto 1fr; gap:13px; padding:12px 0; border-top:1px solid var(--line); align-items:start;}
+  .cf-step .lvl{font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#fff;
+    background:var(--teal); border-radius:5px; padding:3px 8px; white-space:nowrap; margin-top:1px;}
+  .cf-step.deep .lvl{background:var(--gold); color:var(--gold-d);}
+  .cf-step p{margin:0; font-size:14.5px; line-height:1.5;}
+  .cf-verdict{margin-top:14px; padding-top:14px; border-top:2px solid var(--ink); font-size:14.5px; color:var(--quiet); line-height:1.55;}
+  .cf-verdict b{color:var(--ink);}
+
+  /* ---- guardrails ---- */
+  .plist{display:grid; grid-template-columns:1fr 1fr; gap:22px 30px;}
+  @media(max-width:600px){.plist{grid-template-columns:1fr;}}
+  .plist h4{font-family:"Fraunces",serif; font-weight:600; font-size:17px; margin:0 0 5px;}
+  .plist p{font-size:14.5px; color:var(--quiet); margin:0; line-height:1.5;}
+
+  /* ---- research ---- */
+  .research{background:var(--pine2); color:var(--paper);}
+  .research .kicker{color:var(--sage);}
+  .research h2{color:var(--paper);}
+  .research p.body{color:var(--sage);}
+  .research p.body b{color:var(--paper);}
+  .paper{border:1px solid var(--line); border-radius:12px; padding:16px 18px; margin-bottom:12px; background:rgba(255,255,255,.03);}
+  .paper .pt{font-family:"Fraunces",serif; font-weight:600; font-size:16px; margin:0 0 4px; color:var(--paper);}
+  .paper .pmeta{font-size:12px; color:var(--sage); margin:0 0 8px;}
+  .paper .pd{font-size:14px; color:var(--sage); margin:0 0 10px; line-height:1.5;}
+  .paper .plinks{display:flex; gap:16px; flex-wrap:wrap; font-size:13px;}
+  .paper .plinks a{color:var(--teal-br); text-decoration:none; font-weight:600;}
+  .paper .plinks a:hover{text-decoration:underline;}
+  .todo{color:var(--gold); font-weight:600; font-size:12px; letter-spacing:.02em;}
+
+  /* ---- cta ---- */
+  .cta-band{background:var(--gold); color:var(--gold-d); text-align:center; padding:44px 24px;}
+  .cta-band h2{color:var(--gold-d); margin-bottom:8px;}
+  .cta-band p{margin:0 0 20px; font-size:15px;}
+  .btn-primary{background:var(--pine); color:var(--paper); border:none; border-radius:999px;
+    font:600 15px "Inter",sans-serif; padding:12px 24px; cursor:pointer; text-decoration:none; display:inline-block;}
+  .btn-primary:hover{background:var(--pine2);}
+
+  footer{background:var(--pine); color:var(--sage); padding:34px 0 50px; font-size:13px;}
+  footer a{color:var(--paper); text-decoration:none;}
+  footer .fnote{margin-top:12px; font-size:11.5px; opacity:.7;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><rect x="2" y="7" width="13" height="11" rx="1.5" stroke="#5BB39E" stroke-width="1.6"/><rect x="5.5" y="4.5" width="13" height="11" rx="1.5" stroke="#5BB39E" stroke-width="1.6" fill="#16261F"/><rect x="9" y="2" width="11" height="4" rx="1.5" fill="#5BB39E"/></svg>
+      Read Laterally
+    </a>
+    <a class="back" href="index.html">&larr; Back to the tool</a>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">How it works</p>
+    <h1>You check a claim by <span class="lat">leaving</span> it, not by studying it.</h1>
+    <p class="lede">The whole method in one idea, plus the research it stands on. <b>No verdict is ever handed to you.</b></p>
+  </div>
+</header>
+
+<!-- THE REFRAME -->
+<section class="section">
+  <div class="wrap">
+    <p class="kicker">The core idea</p>
+    <h2 class="mb">Lateral reading, not vertical reading.</h2>
+    <p class="lead-line">Most people read <em>vertically</em>: they stay on a page and judge it from the inside.</p>
+    <p class="body">They look at the logo, the confident tone, the trustworthy-sounding domain. This is exactly what a misleading source is built to survive. Official-looking design, scientific-sounding language, and a <b>.org</b> address are all cheap to fake, and they're aimed precisely at the reader who's trying to be careful.</p>
+    <p class="body">Professional fact-checkers do something different. They read <b>laterally</b>: they leave the page almost immediately and open new tabs to see what the rest of the web says about the source and the claim. They don't waste time evaluating an unfamiliar source from within. They get out and check it from outside.</p>
+    <div class="callout">In an influential study, this single habit let professional fact-checkers <b>outperform both historians and Stanford students</b> at judging the credibility of websites, often in a fraction of the time. The skill wasn't knowing more. It was knowing to leave.</div>
+    <p class="body">This companion is that habit, made easy. It never grades the claim for you. It routes you, fast, to the places where you can judge it yourself, and it does that in tiers so you rarely have to do much work at all.</p>
+  </div>
+</section>
+
+<!-- THE TIERS -->
+<section class="section">
+  <div class="wrap">
+    <p class="kicker">The routing</p>
+    <h2 class="mb">Three tiers. Most claims never reach the third.</h2>
+    <div class="tiers">
+      <div class="tier">
+        <div class="node">0</div>
+        <p class="secs">≈ 1 second · automatic</p>
+        <h3>Already fact-checked?</h3>
+        <p>Before you do anything, the tool searches a database of published fact-checks, the aggregated work of outlets like Snopes, PolitiFact, and dozens of others worldwide. If professionals have already looked at your claim, their findings appear at once.</p>
+        <p>"Someone already checked this" is the fastest possible answer, and a large share of everyday claims can resolve right here with no effort from you.</p>
+      </div>
+      <div class="tier">
+        <div class="node">1</div>
+        <p class="secs">≈ 10 seconds · one question</p>
+        <h3>The one question that catches the most</h3>
+        <p>If nothing's on file, the tool skips the checklist and asks the single most useful thing a fact-checker asks first: do you recognize who's behind this, and would they benefit from you believing it?</p>
+        <p>A loud source that profits from the very claim it's making is the oldest red flag there is. For a surprising number of claims, sitting with that one question is genuinely enough to make an informed call.</p>
+      </div>
+      <div class="tier deep">
+        <div class="node">2</div>
+        <p class="secs">Only if you want it</p>
+        <h3>The full lateral read</h3>
+        <p>When a claim truly warrants a closer look, the deep dive walks the three classic moves, with searches pre-built so you click instead of type: <b>who</b> is behind it, <b>where</b> it originated, and <b>who else</b> is covering it.</p>
+        <p>This is the real skill, offered on demand rather than forced on every claim by default. It's the same flow the browser extension runs.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WORKED EXAMPLE -->
+<section class="section">
+  <div class="wrap">
+    <p class="kicker">Watch it run once</p>
+    <h2 class="mb">One claim, all the way through.</h2>
+    <p class="body" style="margin-bottom:20px">You understand a process best by watching it run once. Here's a single claim moving through all three tiers.</p>
+    <div class="casefile">
+      <div class="cf-head">
+        <span class="cf-tag">
+          <svg width="15" height="15" viewBox="0 0 22 22" fill="none"><rect x="2" y="7" width="13" height="11" rx="1.5" stroke="#9FC0B4" stroke-width="1.6"/><rect x="5.5" y="4.5" width="13" height="11" rx="1.5" stroke="#9FC0B4" stroke-width="1.6" fill="#16261F"/><rect x="9" y="2" width="11" height="4" rx="1.5" fill="#9FC0B4"/></svg>
+          Case file
+        </span>
+        <span>One claim, all three tiers</span>
+      </div>
+      <div class="cf-body">
+        <p class="cf-claim">"New study says this one common food doubles your risk of heart disease."</p>
+        <div class="cf-step">
+          <span class="lvl">Tier 0</span>
+          <p>The scan finds a related fact-check: one outlet rated a near-identical headline <strong>Missing Context</strong>. That's already a signal, in about a second, that the framing is contested, before you've read a word of the article.</p>
+        </div>
+        <div class="cf-step">
+          <span class="lvl">Tier 1</span>
+          <p>Who's behind it? The claim traces back to a supplement retailer's blog, and they'd benefit from you distrusting an ordinary food. That's the reflex firing: the loudest source is the one that profits from the claim.</p>
+        </div>
+        <div class="cf-step deep">
+          <span class="lvl">Tier 2</span>
+          <p>Dig deeper and the "study" turns out to be a conference abstract, not a peer-reviewed paper. "Doubles your risk" means going from 2% to 4%, a two percentage-point change dressed up as alarming. And two other major outlets never covered it at all, so the convergence that would make it credible simply isn't there.</p>
+        </div>
+        <p class="cf-verdict">At no point did the tool say <b>true</b> or <b>false</b>. You worked it out yourself, and you now know exactly why you'd hold this one loosely. Total time: under two minutes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GUARDRAILS -->
+<section class="section">
+  <div class="wrap">
+    <p class="kicker">What it won't do</p>
+    <h2 class="mb">It builds your judgment. It doesn't replace it.</h2>
+    <div class="plist">
+      <div><h4>No verdict, ever</h4><p>It never tells you a claim is true or false, and never gives a credibility score. A rating you don't understand is just one more thing to take on faith, and this tool exists to do the opposite.</p></div>
+      <div><h4>It won't pick your sources</h4><p>It coaches you to cross-check across independent sources, but it doesn't decide which institutions you should trust. That judgment stays yours.</p></div>
+      <div><h4>Fast on purpose</h4><p>The point of checking quickly is knowing what to ignore, so your attention goes to what deserves it. A quick exit is a win, not a failure.</p></div>
+      <div><h4>Nothing stored</h4><p>What you check isn't logged, sold, or kept. The analysis happens, and then it's gone. No accounts, no tracking.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- THE STUDY BEHIND IT -->
+<section class="section">
+  <div class="wrap">
+    <p class="kicker">The study behind it</p>
+    <h2 class="mb">What Wineburg and McGrew actually found.</h2>
+    <p class="body">The whole approach traces back to a 2019 study by Sam Wineburg and Sarah McGrew that gave a name to the skill this tool teaches. They sat 45 people down in front of unfamiliar websites and asked them to judge how trustworthy each one was: 10 professional fact-checkers, 10 PhD historians, and 25 Stanford undergraduates. Everyone thought aloud while a screen recorder captured every click.</p>
+    <p class="body">The historians and the students, all obviously capable readers, mostly stayed <b>on</b> the page and sized it up from the inside: the logo, the tidy layout, the <b>.org</b> in the address, the references at the bottom, the "MD" after an author's name. And that's exactly how they got fooled. In one task, a fringe advocacy group with an official-looking site was judged <em>more</em> reliable than the largest pediatric association in the world, because its page simply looked the part. Polished design and scientific-sounding language turned out to be trivially easy to fake.</p>
+    <div class="callout">The fact-checkers did something different, and they did it fast. They left the page almost immediately, opened new tabs, and searched to see what the rest of the web said about the source. Wineburg and McGrew called it <b>reading laterally</b>. On one task the checkers reached a sound conclusion in about half a minute; the historians took nearly three times as long and often never got there at all.</div>
+    <p class="body">Two more habits separated the checkers from everyone else, and both are built into this tool. They <b>took bearings</b> before diving in: get a sense of where you've landed before you start reading closely. And they practiced <b>click restraint</b>, scanning the whole search-results page and reading the snippets before clicking anything, rather than trusting the top result. The headline finding is almost paradoxical: the experts <b>read less and learned more</b>. They ignored most of the page on purpose, which freed them to spend their attention on the few things that actually revealed who was behind it.</p>
+    <p class="body" style="margin-bottom:0">That's the entire idea this tool is built to make effortless. You don't need to become a professional fact-checker. You just need the one move they all make: get off the page and look around.</p>
+  </div>
+</section>
+
+<!-- SCAN SUMMARY -->
+<section class="section">
+  <div class="wrap">
+    <p class="kicker">The short version</p>
+    <h2 class="mb">When in doubt, SCAN it.</h2>
+    <p class="body" style="margin-bottom:24px">If you remember nothing else, remember these four moves. They're the method in a single word, and they're the order the tool walks you through.</p>
+    <div class="tiers">
+      <div class="tier">
+        <div class="node">S</div>
+        <h3>Search if it's known</h3>
+        <p>See whether someone has already fact-checked this. Half the time, that's the whole job.</p>
+      </div>
+      <div class="tier">
+        <div class="node">C</div>
+        <h3>Consider the source</h3>
+        <p>Who's behind this, and would they benefit from you believing it? The single most useful question.</p>
+      </div>
+      <div class="tier">
+        <div class="node">A</div>
+        <h3>Ask who else</h3>
+        <p>Are independent outlets saying the same thing? Agreement between sources that have no reason to agree is what counts.</p>
+      </div>
+      <div class="tier deep">
+        <div class="node">N</div>
+        <h3>Navigate elsewhere if needed</h3>
+        <p>Still unsure? Leave the page and trace the claim back to where it started. That's lateral reading in one move.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESEARCH -->
+<section class="section research">
+  <div class="wrap">
+    <p class="kicker">The evidence</p>
+    <h2 class="mb">This isn't a hunch.</h2>
+    <p class="body">The whole design rests on a body of research about how people actually evaluate information, and what habits separate the people who do it well. A few of the key papers, with plain-language summaries where I've written them:</p>
+
+    <div class="paper">
+      <p class="pt">Lateral reading and the nature of expertise</p>
+      <p class="pmeta">Wineburg &amp; McGrew, 2019 · Teachers College Record</p>
+      <p class="pd">The study summarized above: fact-checkers, historians, and Stanford students evaluate unfamiliar sites. The checkers read laterally, and reached sounder conclusions in a fraction of the time.</p>
+      <p class="plinks">
+        <a href="#REPLACE-with-paper-url">Read the paper &rarr;</a>
+        <a href="#REPLACE-with-your-summary-url">My plain-language summary <span class="todo">(add link)</span></a>
+      </p>
+    </div>
+
+    <div class="paper">
+      <p class="pt">Critical ignoring as a core competence for the digital age</p>
+      <p class="pmeta">Kozyreva, Wineburg, Lewandowsky &amp; Hertwig, 2023 · Current Directions in Psychological Science</p>
+      <p class="pd">Argues that in an attention economy, knowing what to <em>not</em> read is as important as knowing what to read. Lateral reading is one of the three core "critical ignoring" skills. This is the paper the whole IgnoreMore idea grows out of.</p>
+      <p class="plinks">
+        <a href="#REPLACE-with-paper-url">Read the paper &rarr;</a>
+        <a href="#REPLACE-with-your-summary-url">My plain-language summary <span class="todo">(add link)</span></a>
+      </p>
+    </div>
+
+    <div class="paper">
+      <p class="pt">Accuracy prompts and sharing of misinformation</p>
+      <p class="pmeta">Pennycook et al., 2021 · Nature</p>
+      <p class="pd">A simple nudge toward accuracy, just getting people to pause and consider whether something is true, measurably reduced the sharing of false content. The reason the tool asks you to stop and consider the source before anything else.</p>
+      <p class="plinks">
+        <a href="#REPLACE-with-paper-url">Read the paper &rarr;</a>
+        <a href="#REPLACE-with-your-summary-url">My plain-language summary <span class="todo">(add link)</span></a>
+      </p>
+    </div>
+
+    <p class="body" style="margin-top:20px; margin-bottom:0">Want the fuller version? I write about all of this on the <a href="#REPLACE-with-substack-url" style="color:var(--teal-br); font-weight:600; text-decoration:none;">Misguided newsletter</a>, and it's the subject of my book, <i>Misguided</i>.</p>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-band">
+  <div class="wrap">
+    <h2>Try it on something.</h2>
+    <p>The best way to understand it is to run a claim through.</p>
+    <a class="btn-primary" href="index.html">Check a claim &rarr;</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>Built by <a href="https://matthewfacciani.com" target="_blank" rel="noopener">Matthew Facciani, PhD</a>, author of <i>Misguided</i>.</div>
+    <div class="fnote">Grounded in lateral-reading and critical-ignoring research. Citations above. This is a demo mockup.</div>
+  </div>
+</footer>
+
+</body>
+</html>

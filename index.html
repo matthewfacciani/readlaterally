@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Read Laterally: Check it in seconds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pine:#16261F; --pine2:#1E332B;
+    --paper:#F7F5EE; --ink:#20302B;
+    --teal:#3E7C74; --teal-d:#2f5f59; --teal-br:#5BB39E;
+    --sage:#9FC0B4; --mist:#EAF1ED;
+    --gold:#E7B15A; --gold-d:#231a08;
+    --line:#DDE4DF; --quiet:#66756F;
+    --warm:#A9584F;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:"Inter",system-ui,sans-serif; line-height:1.55;
+  }
+  .wrap{max-width:720px; margin:0 auto; padding:0 24px;}
+
+  /* ---------- hero (deep pine, like the cover) ---------- */
+  .hero{
+    background:
+      radial-gradient(120% 90% at 82% 8%, rgba(91,179,158,.16), transparent 55%),
+      radial-gradient(90% 80% at 8% 100%, rgba(231,177,90,.07), transparent 60%),
+      var(--pine);
+    color:var(--paper);
+    padding:44px 0 54px;
+  }
+  .hero-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:52px;}
+  .brand{display:flex; align-items:center; gap:9px; font-size:14px; font-weight:600; letter-spacing:.01em;}
+  .hero-nav{font-size:13px; color:var(--sage); display:flex; gap:20px;}
+  .hero-nav a{color:var(--sage); text-decoration:none;}
+  .hero-nav a:hover{color:var(--paper);}
+
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:9px;
+    font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--sage); margin-bottom:20px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--teal-br);
+    box-shadow:0 0 0 4px rgba(91,179,158,.18);}
+  h1{
+    font-family:"Fraunces",serif; font-weight:900;
+    font-size:clamp(36px,6vw,58px); line-height:1.03; letter-spacing:-.015em;
+    margin:0 0 20px;
+  }
+  h1 .lat{font-style:italic; font-weight:600; color:var(--gold);}
+  .lede{font-size:clamp(16px,1.9vw,18px); color:var(--sage); max-width:52ch; margin:0 0 6px;}
+  .lede b{color:var(--paper); font-weight:600;}
+
+  /* ---------- the interactive check box ---------- */
+  .checker{
+    background:var(--paper); color:var(--ink);
+    border-radius:18px; padding:22px;
+    box-shadow:0 30px 60px -24px rgba(0,0,0,.55);
+    margin-top:34px;
+  }
+  .checker-label{font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--teal); margin:0 0 8px;}
+  textarea{
+    width:100%; border:1px solid var(--line); border-radius:11px; background:#fff;
+    color:var(--ink); font:15px/1.5 "Inter",sans-serif; padding:12px 14px; resize:vertical;
+    min-height:74px;
+  }
+  textarea:focus{outline:2px solid var(--teal); outline-offset:1px; border-color:transparent;}
+  .checker-row{display:flex; gap:10px; align-items:center; margin-top:12px; flex-wrap:wrap;}
+  .btn-primary{
+    background:var(--gold); color:var(--gold-d); border:none; border-radius:999px;
+    font:600 15px "Inter",sans-serif; padding:12px 22px; cursor:pointer;
+    display:inline-flex; align-items:center; gap:9px;
+    transition:transform .13s ease, box-shadow .13s ease;
+  }
+  .btn-primary:hover{transform:translateY(-1px); box-shadow:0 8px 22px rgba(231,177,90,.3);}
+  .try-these{font-size:12.5px; color:var(--quiet);}
+  .try-these button{
+    background:none; border:none; color:var(--teal-d); font:inherit; font-size:12.5px;
+    text-decoration:underline; cursor:pointer; padding:0 2px;
+  }
+
+  /* ---------- results stages ---------- */
+  #stage{margin-top:18px;}
+  .stage-card{
+    border:1px solid var(--line); border-radius:12px; background:#fff;
+    padding:16px 18px; margin-bottom:12px; animation:rise .34s ease;
+  }
+  @keyframes rise{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  @media (prefers-reduced-motion:reduce){.stage-card{animation:none;}}
+
+  .badge{display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.07em;
+    text-transform:uppercase; color:#fff; background:var(--teal); border-radius:5px; padding:3px 9px; margin-bottom:10px;}
+  .badge.scan{background:var(--sage); color:var(--pine);}
+  .badge.q{background:var(--gold); color:var(--gold-d);}
+
+  .fc{border:1px solid var(--line); border-left:4px solid var(--line); border-radius:9px;
+    padding:11px 13px; margin-bottom:9px; text-decoration:none; color:var(--ink); display:block;}
+  .fc:hover{border-color:var(--teal);}
+  .fc-rating{font-weight:700; font-size:13px; margin:0 0 3px;}
+  .fc-claim{margin:0 0 5px; font-size:13.5px;}
+  .fc-pub{margin:0; font-size:11.5px; color:var(--quiet);}
+  .fc-pub::after{content:" \2197";}
+
+  .restraint{background:var(--mist); border-radius:8px; padding:9px 12px; font-size:12.5px; margin:10px 0 4px; color:var(--ink);}
+
+  .q-big{font-family:"Fraunces",serif; font-size:19px; line-height:1.34; font-weight:600; margin:2px 0 4px;}
+  .q-sub{font-size:12.5px; color:var(--quiet); margin:0 0 14px;}
+  .opts{display:flex; flex-direction:column; gap:8px;}
+  .opt{text-align:left; background:#fff; border:1px solid var(--line); border-radius:9px;
+    padding:12px 14px; font:500 14px "Inter",sans-serif; color:var(--ink); cursor:pointer; line-height:1.35;}
+  .opt:hover{border-color:var(--teal); background:var(--mist);}
+  .opt.picked{border-color:var(--teal); border-width:2px;}
+
+  .reflection{margin-top:14px; padding:12px 14px; border-radius:9px; background:var(--mist); font-size:13.5px; line-height:1.5;}
+  .beat{display:flex; align-items:center; gap:8px; background:var(--mist); border-radius:9px;
+    padding:11px 13px; font-size:13px; font-weight:600; color:var(--teal-d); margin-top:12px;}
+  .beat .ck{flex-shrink:0; width:20px;height:20px;border-radius:50%;background:var(--teal);
+    display:flex;align-items:center;justify-content:center;}
+  .next-row{display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;}
+
+  /* ---------- tier 2: the real deep dive ---------- */
+  .t2-claimbox{background:var(--mist); border-radius:9px; padding:10px 13px; margin-bottom:12px;}
+  .t2-claimbox p{margin:0; font-weight:600; font-size:14px;}
+  .t2-opening{font-size:14px; margin:0 0 14px;}
+  .t2-restraint{background:var(--mist); border-radius:8px; padding:9px 12px; font-size:12px; margin:0 0 16px;}
+
+  .pillar2{position:relative; padding:0 0 18px 30px; margin-bottom:2px;}
+  .pillar2::before{content:""; position:absolute; left:10px; top:24px; bottom:-2px; width:2px; background:var(--line);}
+  .pillar2:last-of-type::before{display:none;}
+  .pillar2 .p-marker{position:absolute; left:0; top:0; width:21px; height:21px; border-radius:50%;
+    border:2px solid var(--line); background:#fff; display:flex; align-items:center; justify-content:center;}
+  .pillar2.done .p-marker{background:var(--teal); border-color:var(--teal);}
+  .pillar2 h4{font-family:"Fraunces",serif; font-size:15.5px; font-weight:700; margin:0 0 5px;}
+  .pillar2 .p-coaching{font-size:13.5px; margin:0 0 9px; color:var(--ink);}
+  .p-searches{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:9px;}
+  .p-search-btn{display:inline-block; background:#fff; border:1px solid var(--line); border-radius:999px;
+    color:var(--teal-d); font-size:11.5px; font-weight:600; padding:5px 11px; text-decoration:none;}
+  .p-search-btn:hover{border-color:var(--teal); background:var(--mist);}
+  .p-search-btn::after{content:" \2197";}
+  .p-taps{display:flex; flex-wrap:wrap; gap:6px;}
+  .p-tap{background:#fff; border:1px solid var(--line); border-radius:999px; font-size:11.5px;
+    padding:5px 11px; cursor:pointer; color:var(--ink);}
+  .p-tap:hover{border-color:var(--teal);}
+  .p-tap.picked{background:var(--teal); border-color:var(--teal); color:#fff; font-weight:600;}
+
+  .t2-verdict{background:#fff; border:1px solid var(--line); border-radius:9px; padding:11px 14px;
+    font-size:14px; font-weight:600; margin:6px 0 16px; display:none;}
+  .t2-science, .t2-tools{background:#fff; border:1px solid var(--line); border-radius:9px; padding:11px 14px; margin:0 0 14px;}
+  .t2-science .lbl, .t2-tools .lbl{font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--teal); display:block; margin-bottom:5px;}
+  .t2-science p, .t2-tools p{margin:0; font-size:13.5px;}
+  .t2-tools ul{margin:0; padding-left:18px;}
+  .t2-tools li{font-size:13px; margin-bottom:4px;}
+  .t2-closing{font-style:italic; color:var(--quiet); font-size:13px; margin:0;}
+
+  .spin{display:inline-block; width:14px; height:14px; border:2px solid var(--line); border-top-color:var(--teal);
+    border-radius:50%; animation:spinner .8s linear infinite; vertical-align:-2px; margin-right:7px;}
+  @keyframes spinner{to{transform:rotate(360deg);}}
+  .err-box{background:#faf1ef; border:1px solid #d9b6ae; border-radius:8px; padding:10px 12px; font-size:12.5px; color:#8a3f34; margin-bottom:10px;}
+  .btn-ghost{background:none; border:1px solid var(--line); border-radius:999px; color:var(--ink);
+    font:500 13.5px "Inter",sans-serif; padding:10px 18px; cursor:pointer;}
+  .btn-ghost:hover{border-color:var(--teal); color:var(--teal-d);}
+  .btn-solid{background:var(--teal); border:none; border-radius:999px; color:#fff;
+    font:600 13.5px "Inter",sans-serif; padding:10px 18px; cursor:pointer;}
+  .btn-solid:hover{background:var(--teal-d);}
+
+
+  /* ---------- how it works ---------- */
+  .section{padding:56px 0;}
+  .kicker{font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--teal); margin:0 0 10px;}
+  h2{font-family:"Fraunces",serif; font-weight:600; font-size:clamp(26px,3.6vw,34px); line-height:1.12; margin:0 0 28px; letter-spacing:-.01em;}
+
+  .tiers{position:relative; padding-left:34px;}
+  .tiers::before{content:""; position:absolute; left:13px; top:8px; bottom:8px; width:2px; background:var(--line);}
+  .tier{position:relative; margin-bottom:26px;}
+  .tier:last-child{margin-bottom:0;}
+  .tier .node{position:absolute; left:-34px; top:0; width:28px; height:28px; border-radius:50%;
+    background:#fff; border:2px solid var(--teal); display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:13px; color:var(--teal-d);}
+  .tier.deep .node{border-color:var(--gold); color:#9a6b1e;}
+  .tier h3{font-family:"Fraunces",serif; font-weight:600; font-size:19px; margin:0 0 4px;}
+  .tier p{margin:0; font-size:14.5px; color:var(--quiet);}
+  .tier .secs{font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--teal); }
+
+  /* ---------- principles ---------- */
+  .principles{background:var(--pine2); color:var(--paper);}
+  .principles .kicker{color:var(--sage);}
+  .principles h2{color:var(--paper);}
+  .plist{display:grid; grid-template-columns:1fr 1fr; gap:24px 30px;}
+  @media (max-width:620px){.plist{grid-template-columns:1fr;}}
+  .plist h4{font-size:15px; margin:0 0 5px; color:var(--paper);}
+  .plist p{font-size:13.5px; color:var(--sage); margin:0; line-height:1.5;}
+
+  /* ---------- case file (worked example) ---------- */
+  .casefile{border:1px solid var(--line); border-radius:14px; overflow:hidden; background:#fff; margin-top:6px;}
+  .cf-head{background:var(--pine); color:var(--paper); padding:11px 16px; display:flex; align-items:center; justify-content:space-between;
+    font-size:11px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;}
+  .cf-head .cf-tag{display:flex; align-items:center; gap:8px; color:var(--sage);}
+  .cf-body{padding:18px 20px;}
+  .cf-claim{font-family:"Fraunces",serif; font-weight:600; font-size:18px; line-height:1.32; margin:0 0 16px;}
+  .cf-step{display:grid; grid-template-columns:auto 1fr; gap:13px; padding:12px 0; border-top:1px solid var(--line); align-items:start;}
+  .cf-step .lvl{font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#fff;
+    background:var(--teal); border-radius:5px; padding:3px 8px; white-space:nowrap; margin-top:1px;}
+  .cf-step.deep .lvl{background:var(--gold); color:var(--gold-d);}
+  .cf-step p{margin:0; font-size:14.5px; line-height:1.5;}
+  .cf-verdict{margin-top:14px; padding-top:14px; border-top:2px solid var(--ink); font-size:14.5px; color:var(--quiet); line-height:1.55;}
+  .cf-verdict b{color:var(--ink);}
+
+  /* ---------- SCAN strip ---------- */
+  .scan-strip{margin-top:26px; border:1px solid var(--line); border-radius:14px; padding:18px 20px; background:var(--mist);}
+  .scan-title{margin:0 0 12px; font-size:14px; color:var(--quiet);}
+  .scan-title strong{color:var(--teal-d); letter-spacing:.05em;}
+  .scan-list{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:1fr 1fr; gap:10px 20px;}
+  @media(max-width:560px){.scan-list{grid-template-columns:1fr;}}
+  .scan-list li{font-size:14px; display:flex; align-items:baseline; gap:10px;}
+  .scan-list li span{flex-shrink:0; width:24px; height:24px; border-radius:6px; background:var(--teal); color:#fff;
+    font-weight:700; font-size:13px; display:inline-flex; align-items:center; justify-content:center;}
+  .scan-list li:last-child span{background:var(--gold); color:var(--gold-d);}
+
+  /* ---------- suite / cross-links ---------- */
+  .suite{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media (max-width:620px){.suite{grid-template-columns:1fr;}}
+  .suite-card{border:1px solid var(--line); border-radius:13px; padding:18px; text-decoration:none; color:var(--ink); display:block; background:#fff;}
+  .suite-card:hover{border-color:var(--teal);}
+  .suite-card .st{font-weight:600; font-size:15px; margin:0 0 5px;}
+  .suite-card .sd{font-size:13px; color:var(--quiet); margin:0;}
+  .suite-card .arrow{color:var(--teal-d); font-size:13px; margin-top:8px; display:inline-block;}
+
+  /* ---------- footer ---------- */
+  footer{background:var(--pine); color:var(--sage); padding:40px 0; font-size:13px;}
+  footer a{color:var(--paper); text-decoration:none;}
+  footer .fnote{margin-top:14px; font-size:11.5px; opacity:.7;}
+
+  .cta-band{background:var(--gold); color:var(--gold-d); text-align:center; padding:44px 24px;}
+  .cta-band h2{color:var(--gold-d); margin-bottom:8px;}
+  .cta-band p{margin:0 0 20px; font-size:15px;}
+  .cta-band .btn-primary{background:var(--pine); color:var(--paper);}
+</style>
+</head>
+<body>
+
+<!-- ===================== HERO ===================== -->
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-top">
+      <span class="brand">
+        <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><rect x="2" y="7" width="13" height="11" rx="1.5" stroke="#5BB39E" stroke-width="1.6"/><rect x="5.5" y="4.5" width="13" height="11" rx="1.5" stroke="#5BB39E" stroke-width="1.6" fill="#16261F"/><rect x="9" y="2" width="11" height="4" rx="1.5" fill="#5BB39E"/></svg>
+        Read Laterally
+      </span>
+      <nav class="hero-nav">
+        <a href="how-it-works.html">How it works</a>
+        <a href="#suite">The suite</a>
+        <a href="#get">Get the extension</a>
+      </nav>
+    </div>
+
+    <span class="eyebrow"><span class="dot"></span>A lateral reading companion</span>
+    <h1>Read <span class="lat">Laterally</span>.<br>Check it in seconds.</h1>
+    <p class="lede">Most claims are already fact-checked: you just haven't looked yet. Paste anything below. We check if it's already been debunked, then guide you through <b>who's behind it, where it started, and who else is saying it</b>. No verdict handed to you.</p>
+
+    <!-- interactive checker -->
+    <div class="checker">
+      <p class="checker-label">Check a claim</p>
+      <textarea id="claim-input" placeholder="Paste a claim, headline, or a sentence that gave you pause..."></textarea>
+      <div class="checker-row">
+        <button class="btn-primary" id="check-btn">
+          Check this
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#231a08" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <span class="try-these">Try:
+          <button data-demo="vaccine">a debunked claim</button> ·
+          <button data-demo="unknown">an unfamiliar source</button>
+        </span>
+      </div>
+      <div id="stage"></div>
+    </div>
+  </div>
+</header>
+
+<!-- ===================== HOW IT WORKS ===================== -->
+<section class="section" id="how">
+  <div class="wrap">
+    <p class="kicker">The idea</p>
+    <h2>Three tiers. Most claims never reach the third.</h2>
+    <div class="tiers">
+      <div class="tier">
+        <div class="node">0</div>
+        <p class="secs">~1 second</p>
+        <h3>Already fact-checked?</h3>
+        <p>We search a database of published fact-checks first. If professionals already looked at this, you see their findings immediately. Half of claims can end right here.</p>
+      </div>
+      <div class="tier">
+        <div class="node">1</div>
+        <p class="secs">~10 seconds</p>
+        <h3>The one question that catches the most</h3>
+        <p>If nothing's on file, we skip the checklist and ask the single most useful thing: do you recognize who's behind this, and would they benefit from you believing it? For a lot of claims, that's enough.</p>
+      </div>
+      <div class="tier deep">
+        <div class="node">2</div>
+        <p class="secs">Only if you want</p>
+        <h3>The full lateral read</h3>
+        <p>When a claim actually warrants it, dig deeper: who's behind it, where it originated, who else is covering it, with one-click searches and coaching at each step. This is the real skill, on demand rather than by default.</p>
+      </div>
+    </div>
+
+    <!-- worked example -->
+    <div class="casefile" style="margin-top:34px">
+      <div class="cf-head">
+        <span class="cf-tag">
+          <svg width="15" height="15" viewBox="0 0 22 22" fill="none"><rect x="2" y="7" width="13" height="11" rx="1.5" stroke="#9FC0B4" stroke-width="1.6"/><rect x="5.5" y="4.5" width="13" height="11" rx="1.5" stroke="#9FC0B4" stroke-width="1.6" fill="#16261F"/><rect x="9" y="2" width="11" height="4" rx="1.5" fill="#9FC0B4"/></svg>
+          Case file
+        </span>
+        <span>One claim, all three tiers</span>
+      </div>
+      <div class="cf-body">
+        <p class="cf-claim">"New study says this one common food doubles your risk of heart disease."</p>
+        <div class="cf-step">
+          <span class="lvl">Tier 0</span>
+          <p>The scan finds a related fact-check: one outlet rated a near-identical headline <strong>Missing Context</strong>. That's already a signal, in about a second, that the framing is contested.</p>
+        </div>
+        <div class="cf-step">
+          <span class="lvl">Tier 1</span>
+          <p>Who's behind it? The claim traces to a supplement retailer's blog, and they'd benefit from you distrusting the food. That's the reflex firing.</p>
+        </div>
+        <div class="cf-step deep">
+          <span class="lvl">Tier 2</span>
+          <p>Dig deeper and the "study" turns out to be a conference abstract, not a peer-reviewed paper. "Doubles your risk" means going from 2% to 4%. Two other major outlets never covered it at all.</p>
+        </div>
+        <p class="cf-verdict">The tool never said <b>true</b> or <b>false</b>. You now know exactly why you'd hold this one loosely, and you got there in under two minutes.</p>
+      </div>
+    </div>
+
+    <div class="scan-strip">
+      <p class="scan-title">The method, in a word: <strong>SCAN</strong></p>
+      <ul class="scan-list">
+        <li><span>S</span> Search if it's already been checked</li>
+        <li><span>C</span> Consider the source, and who benefits</li>
+        <li><span>A</span> Ask who else is saying it</li>
+        <li><span>N</span> Navigate elsewhere if you're still unsure</li>
+      </ul>
+    </div>
+
+    <p style="margin-top:22px; font-size:14.5px;">
+      <a href="how-it-works.html" style="color:var(--teal-d); font-weight:600; text-decoration:none;">Read the full method, and the research behind it &rarr;</a>
+    </p>
+  </div>
+</section>
+
+<!-- ===================== PRINCIPLES ===================== -->
+<section class="section principles">
+  <div class="wrap">
+    <p class="kicker">Why it works this way</p>
+    <h2>It builds your judgment. It doesn't replace it.</h2>
+    <div class="plist">
+      <div><h4>No verdict, ever</h4><p>The tool never tells you a claim is true or false. It shows you how to find out, because a credibility score you don't understand is just another thing to take on faith.</p></div>
+      <div><h4>Lateral, not vertical</h4><p>Fact-checkers don't judge a source by studying the source. They leave it and see what the rest of the web says. That single habit is the whole method.</p></div>
+      <div><h4>Fast on purpose</h4><p>The point of checking quickly is knowing what to ignore, so your attention goes to things that deserve it. A quick exit is a win, not a failure.</p></div>
+      <div><h4>Nothing stored</h4><p>What you check isn't logged or sold. The analysis happens, and then it's gone. No accounts, no tracking.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SUITE ===================== -->
+<section class="section" id="suite">
+  <div class="wrap">
+    <p class="kicker">Part of a set</p>
+    <h2>Tools for a noisy information world.</h2>
+    <div class="suite">
+      <a class="suite-card" href="https://critignore.com" target="_blank" rel="noopener">
+        <p class="st">Critical Ignoring Companion</p>
+        <p class="sd">Paste a heated comment or reply. Get a read on whether it's worth your time: reply, ignore, or block.</p>
+        <span class="arrow">critignore.com \2197</span>
+      </a>
+      <a class="suite-card" href="https://matthewfacciani.github.io/tools" target="_blank" rel="noopener">
+        <p class="st">Identity Map &amp; Network Audit</p>
+        <p class="sd">See the lenses you bring to information before you even encounter it, and how diverse your close network really is.</p>
+        <span class="arrow">See the tools \2197</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CTA ===================== -->
+<section class="cta-band" id="get">
+  <div class="wrap">
+    <h2>Want it while you browse?</h2>
+    <p>The browser extension does all this proactively, right on the page you're reading.</p>
+    <button class="btn-primary">Add to your browser</button>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>Built by <a href="https://matthewfacciani.com" target="_blank" rel="noopener">Matthew Facciani, PhD</a>, author of <i>Misguided</i>.</div>
+    <div class="fnote">Grounded in lateral-reading research (Wineburg &amp; McGrew, 2019; Kozyreva et al., 2023). This is a demo mockup; the check box uses sample data.</div>
+  </div>
+</footer>
+
+<script>
+// ============================================================
+// CONFIG — the one line you fill in after deploying the proxy.
+// Example: "https://read-laterally-proxy.vercel.app"
+// ============================================================
+const PROXY_BASE = "https://lrc-proxy.vercel.app";
+
+// ============================================================
+// State
+// ============================================================
+const stage = document.getElementById("stage");
+const input = document.getElementById("claim-input");
+let currentClaimText = "";
+let conversation = []; // full message history, so "dig deeper" and any
+                        // future follow-ups share context with the API
+
+const REFLECTIONS = [
+  "A familiar name isn't the same as an independent one. The strongest sign a claim holds up is when sources that have no reason to agree still land in the same place.",
+  "That's the instinct worth trusting. When the loudest source for a claim is also the one who gains from you believing it, that's exactly when to slow down and see who independent backs it up.",
+  "An unfamiliar source isn't automatically wrong, but it's automatically worth a ten-second look. Leave the page and search the source's name to see what others say about it.",
+];
+
+function ck(){ return '<span class="ck"><svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6.5 5 9.5 10 3" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'; }
+function ratingColor(rating){
+  const r = (rating || "").toLowerCase();
+  if (/(false|fake|pants on fire|incorrect|misleading|debunk|no evidence|hoax)/.test(r)) return "#A9584F";
+  if (/(true|correct|accurate|legit|confirmed)/.test(r)) return "#2E6E63";
+  return "#DDE4DF";
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function safeUrl(url){
+  try { const u = new URL(url); if (u.protocol === "https:" || u.protocol === "http:") return u.href; } catch {}
+  return "#";
+}
+
+// ============================================================
+// Entry points
+// ============================================================
+document.querySelectorAll("[data-demo]").forEach(b=>{
+  b.addEventListener("click",()=>{
+    input.value = b.dataset.demo === "vaccine"
+      ? "Vaccines cause autism"
+      : "A wellness site says this one supplement reverses aging";
+    startCheck();
+  });
+});
+document.getElementById("check-btn").addEventListener("click", startCheck);
+
+async function startCheck(){
+  const t = input.value.trim();
+  if(!t){ input.focus(); return; }
+  currentClaimText = t;
+  conversation = [];
+
+  if (!PROXY_BASE) {
+    stage.innerHTML = `<div class="stage-card"><div class="err-box">This demo isn't connected to a live checker yet, PROXY_BASE is empty in the page's script. (If you're the site owner: paste your deployed proxy URL into PROXY_BASE near the top of index.html.)</div></div>`;
+    return;
+  }
+
+  stage.innerHTML = `<div class="stage-card"><span class="badge scan"><span class="spin"></span>Scanning</span><p style="margin:8px 0 0;font-size:13.5px;color:var(--quiet)">Looking for existing fact-checks…</p></div>`;
+
+  let hits = [];
+  try {
+    const res = await fetch(`${PROXY_BASE}/api/factcheck?q=${encodeURIComponent(t)}`);
+    const data = await res.json();
+    hits = Array.isArray(data.hits) ? data.hits : [];
+  } catch (err) {
+    console.warn("Fact-check lookup failed, continuing to tier 1:", err);
+  }
+
+  if (hits.length) renderTier0(hits);
+  else renderTier1();
+}
+
+// ============================================================
+// TIER 0 — real fact-check results
+// ============================================================
+function renderTier0(hits){
+  const cards = hits.map(h => `
+    <a class="fc" href="${escapeHtml(safeUrl(h.url))}" target="_blank" rel="noopener" style="border-left-color:${ratingColor(h.rating)}">
+      <p class="fc-rating">${escapeHtml(h.rating || "Rated")}</p>
+      <p class="fc-claim">${escapeHtml(h.text || "(see fact-check)")}</p>
+      <p class="fc-pub">${escapeHtml(h.publisher || "")}</p>
+    </a>`).join("");
+  stage.innerHTML = `
+    <div class="stage-card">
+      <span class="badge">Already checked</span>
+      <p style="margin:0 0 12px;font-size:13.5px">Fact-checkers have already looked at this. Here's what they found:</p>
+      ${cards}
+      <p class="restraint">Scan these before deciding. Click the one whose source you'd actually trust, and read past the rating to the reasoning.</p>
+      <div class="beat">${ck()} Answered in a second. No rabbit hole required.</div>
+      <div class="next-row"><button class="btn-ghost" onclick="renderTier1()">None of these match my claim</button></div>
+    </div>`;
+}
+
+// ============================================================
+// TIER 1 — the one question
+// ============================================================
+window.renderTier1 = function(){
+  stage.innerHTML = `
+    <div class="stage-card">
+      <span class="badge q">The one question</span>
+      <p class="q-big">Do you recognize who's behind this, and would they benefit from you believing it?</p>
+      <p class="q-sub">It's what fact-checkers ask first.</p>
+      <div class="opts" id="opts">
+        <button class="opt" data-o="0">I recognize them, and they seem neutral here</button>
+        <button class="opt" data-o="1">I recognize them, but they'd benefit from this being true</button>
+        <button class="opt" data-o="2">Never heard of them</button>
+      </div>
+      <div id="t1-after"></div>
+    </div>`;
+  document.querySelectorAll("#opts .opt").forEach(o=>{
+    o.addEventListener("click",()=>{
+      document.querySelectorAll("#opts .opt").forEach(x=>x.classList.remove("picked"));
+      o.classList.add("picked");
+      const i = Number(o.dataset.o);
+      document.getElementById("t1-after").innerHTML = `
+        <div class="reflection">${REFLECTIONS[i]}</div>
+        <div class="beat">${ck()} Call made in about 10 seconds. That's the fast path working.</div>
+        <div class="next-row">
+          <button class="btn-solid" onclick="startDeepCheck()">Still not sure? Dig deeper</button>
+          <button class="btn-ghost" onclick="stage.innerHTML=''">That's enough, I've got a read on it</button>
+        </div>`;
+    });
+  });
+};
+
+// ============================================================
+// TIER 2 — the real deep dive (calls Claude via the proxy)
+// ============================================================
+window.startDeepCheck = async function(){
+  conversation = [{
+    role: "user",
+    content: "Run a Credibility Check on the following input:\n\n" + JSON.stringify({ userClaim: currentClaimText }, null, 2),
+  }];
+  stage.innerHTML = `<div class="stage-card"><span class="badge q"><span class="spin"></span>Digging deeper</span><p style="margin:8px 0 0;font-size:13.5px;color:var(--quiet)">Running the full check…</p></div>`;
+
+  try {
+    const text = await callCheckApi(conversation);
+    conversation.push({ role: "assistant", content: text });
+    const data = parseModelJson(text);
+    renderTier2(data);
+  } catch (err) {
+    console.error(err);
+    stage.innerHTML = `<div class="stage-card"><div class="err-box">${escapeHtml(friendlyError(err))}</div>
+      <div class="next-row"><button class="btn-ghost" onclick="renderTier1()">Back</button></div></div>`;
+  }
+};
+
+async function callCheckApi(messages){
+  const res = await fetch(`${PROXY_BASE}/api/check`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages }),
+  });
+  const data = await res.json().catch(()=>({}));
+  if (!res.ok) {
+    const err = new Error(data.error || `Service error ${res.status}`);
+    err.fromProxy = true;
+    throw err;
+  }
+  return data.text || "";
+}
+
+function parseModelJson(text){
+  const clean = text.replace(/```json|```/g, "").trim();
+  try { return JSON.parse(clean); }
+  catch {
+    const s = clean.indexOf("{"), e = clean.lastIndexOf("}");
+    if (s !== -1 && e > s) return JSON.parse(clean.slice(s, e+1));
+    throw new Error("Couldn't read the response, try again.");
+  }
+}
+function friendlyError(err){
+  if (err.fromProxy) return err.message;
+  return "The check couldn't run: " + err.message;
+}
+
+const FINDING_OPTIONS = [
+  ["Checks out", "Thin or hidden", "Couldn't tell"],
+  ["Found the original", "Traces to something weaker", "Couldn't trace it"],
+  ["Multiple independent sources", "Only this source", "Mixed"],
+];
+const FINDING_FRAGMENTS = [
+  ["the source checks out", "the source is thin or hidden", "you couldn't tell who's behind it"],
+  ["the claim traces to the original", "the claim traces to something weaker", "you couldn't trace the origin"],
+  ["multiple independent sources are covering it", "only this source is making it", "coverage is mixed"],
+];
+
+function renderTier2(data){
+  const pillars = Array.isArray(data.pillars) ? data.pillars.slice(0,3) : [];
+  const findings = [null, null, null];
+
+  let html = `<div class="stage-card">
+    <div class="t2-claimbox"><p>${escapeHtml(data.claim || currentClaimText)}</p></div>
+    <p class="t2-opening">${escapeHtml(data.opening || "")}</p>
+    <p class="t2-restraint"><strong>Click restraint:</strong> scan the whole results page before clicking anything, then choose deliberately.</p>
+    <div id="p2-list"></div>
+    <div class="t2-verdict" id="t2-verdict"></div>`;
+
+  if ((data.science_checks || "").trim()) {
+    html += `<div class="t2-science"><span class="lbl">This claim cites research</span><p>${escapeHtml(data.science_checks)}</p></div>`;
+  }
+  const tools = Array.isArray(data.tools) ? data.tools.slice(0,3) : [];
+  if (tools.length) {
+    html += `<div class="t2-tools"><span class="lbl">Tools that fit this claim</span><ul>` +
+      tools.map(t => `<li><a href="${escapeHtml(safeUrl(t.url))}" target="_blank" rel="noopener" style="color:var(--teal-d)">${escapeHtml(t.name||"")}</a>: ${escapeHtml(t.why||"")}</li>`).join("") +
+      `</ul></div>`;
+  }
+  html += `<p class="t2-closing">${escapeHtml(data.closing || "")}</p>
+    <div class="next-row" style="margin-top:14px"><button class="btn-ghost" onclick="stage.innerHTML=''">Done</button></div>
+  </div>`;
+  stage.innerHTML = html;
+
+  const listEl = document.getElementById("p2-list");
+  pillars.forEach((p, i) => listEl.appendChild(buildPillar2(p, i, findings)));
+}
+
+function buildPillar2(pillar, index, findings){
+  const wrap = document.createElement("div");
+  wrap.className = "pillar2";
+  const marker = `<span class="p-marker"><svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6.5 5 9.5 10 3" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
+  const searches = Array.isArray(pillar.searches) ? pillar.searches.slice(0,3) : [];
+  const searchHtml = searches.filter(s=>s.url && s.label).map(s =>
+    `<a class="p-search-btn" href="${escapeHtml(safeUrl(s.url))}" target="_blank" rel="noopener">${escapeHtml(s.label)}</a>`
+  ).join("");
+  const tapHtml = (FINDING_OPTIONS[index]||[]).map((label,o) =>
+    `<button class="p-tap" data-i="${index}" data-o="${o}">${escapeHtml(label)}</button>`
+  ).join("");
+
+  wrap.innerHTML = `
+    ${marker}
+    <h4>${escapeHtml(pillar.title || "Step " + (index+1))}</h4>
+    <p class="p-coaching">${escapeHtml(pillar.coaching || "")}</p>
+    <div class="p-searches">${searchHtml}</div>
+    <div class="p-taps">${tapHtml}</div>`;
+
+  wrap.querySelectorAll(".p-tap").forEach(btn => {
+    btn.addEventListener("click", () => {
+      wrap.querySelectorAll(".p-tap").forEach(b=>b.classList.remove("picked"));
+      btn.classList.add("picked");
+      wrap.classList.add("done");
+      findings[index] = Number(btn.dataset.o);
+      maybeShowVerdict(findings);
+    });
+  });
+  return wrap;
+}
+
+function maybeShowVerdict(findings){
+  const box = document.getElementById("t2-verdict");
+  if (!box || findings.some(f => f === null)) return;
+  const sentence = "You found: " +
+    FINDING_FRAGMENTS[0][findings[0]] + ", " +
+    FINDING_FRAGMENTS[1][findings[1]] + ", and " +
+    FINDING_FRAGMENTS[2][findings[2]] + ".";
+  box.textContent = sentence;
+  box.style.display = "block";
+  const avg = findings.reduce((a,f)=>a + [80,20,50][f], 0) / 3;
+  box.style.borderLeft = "4px solid " + (avg >= 60 ? "#2E6E63" : avg <= 35 ? "#A9584F" : "#DDE4DF");
+}
+</script>
+</body>
+</html>
