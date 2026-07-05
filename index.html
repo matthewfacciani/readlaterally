@@ -64,6 +64,19 @@
     margin-top:34px;
   }
   .checker-label{font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--teal); margin:0 0 8px;}
+  .checker-head{display:flex; align-items:center; justify-content:space-between;}
+  .check-count{font-size:12px; font-weight:600; color:var(--quiet); background:var(--mist); border-radius:999px; padding:3px 11px; margin-bottom:8px;}
+  .check-count.hidden{display:none;}
+
+  /* earned badges — small, subtle accomplishment pills */
+  .badge-earn{display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600;
+    border-radius:999px; padding:5px 12px; margin:2px 0 10px; animation:badgePop .34s ease;}
+  .badge-earn svg{flex-shrink:0;}
+  .badge-earn.source{background:#e7f0ee; color:var(--teal-d);}
+  .badge-earn.lateral{background:#fbf1dc; color:#8a6207;}
+  @keyframes badgePop{from{opacity:0; transform:scale(.85);} to{opacity:1; transform:scale(1);}}
+  @media (prefers-reduced-motion:reduce){.badge-earn{animation:none;}}
+  .p-progress{font-size:11.5px; color:var(--quiet); margin:2px 0 0; font-weight:600;}
   textarea{
     width:100%; border:1px solid var(--line); border-radius:11px; background:#fff;
     color:var(--ink); font:15px/1.5 "Inter",sans-serif; padding:12px 14px; resize:vertical;
@@ -110,6 +123,9 @@
 
   .q-big{font-family:"Fraunces",serif; font-size:19px; line-height:1.34; font-weight:600; margin:2px 0 4px;}
   .q-sub{font-size:12.5px; color:var(--quiet); margin:0 0 14px;}
+  .t1-leadin{font-size:13px; color:var(--ink); background:var(--mist); border-radius:8px; padding:9px 12px; margin:0 0 16px;}
+  .link-note{font-size:12.5px; color:var(--ink); background:#fdf6ea; border:1px solid #ecd9b0; border-radius:8px; padding:10px 12px; margin:0 0 12px; line-height:1.5;}
+  .link-note strong{color:#8a6207;}
   .opts{display:flex; flex-direction:column; gap:8px;}
   .opt{text-align:left; background:#fff; border:1px solid var(--line); border-radius:9px;
     padding:12px 14px; font:500 14px "Inter",sans-serif; color:var(--ink); cursor:pointer; line-height:1.35;}
@@ -148,8 +164,9 @@
   .p-tap:hover{border-color:var(--teal);}
   .p-tap.picked{background:var(--teal); border-color:var(--teal); color:#fff; font-weight:600;}
 
-  .t2-verdict{background:#fff; border:1px solid var(--line); border-radius:9px; padding:11px 14px;
-    font-size:14px; font-weight:600; margin:6px 0 16px; display:none;}
+  .t2-verdict{background:var(--mist); border:1px solid var(--line); border-left:3px solid var(--teal); border-radius:9px; padding:12px 14px;
+    font-size:13.5px; font-weight:400; line-height:1.5; margin:6px 0 16px; display:none;}
+  .t2-verdict span{display:block;}
   .t2-science, .t2-tools{background:#fff; border:1px solid var(--line); border-radius:9px; padding:11px 14px; margin:0 0 14px;}
   .t2-science .lbl, .t2-tools .lbl{font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--teal); display:block; margin-bottom:5px;}
   .t2-science p, .t2-tools p{margin:0; font-size:13.5px;}
@@ -264,7 +281,10 @@
 
     <!-- interactive checker -->
     <div class="checker">
-      <p class="checker-label">Check a claim</p>
+      <div class="checker-head">
+        <p class="checker-label">Check a claim</p>
+        <span id="check-count" class="check-count hidden"></span>
+      </div>
       <textarea id="claim-input" placeholder="Paste a claim, headline, or a sentence that gave you pause..."></textarea>
       <div class="checker-row">
         <button class="btn-primary" id="check-btn">
@@ -405,7 +425,7 @@
 // CONFIG — the one line you fill in after deploying the proxy.
 // Example: "https://read-laterally-proxy.vercel.app"
 // ============================================================
-const PROXY_BASE = "https://lrc-proxy.vercel.app";
+const PROXY_BASE = ""; // ← paste your deployed Vercel URL here (no trailing slash)
 
 // ============================================================
 // State
@@ -413,13 +433,51 @@ const PROXY_BASE = "https://lrc-proxy.vercel.app";
 const stage = document.getElementById("stage");
 const input = document.getElementById("claim-input");
 let currentClaimText = "";
+let inputHasLink = false; // true when the pasted claim is or contains a URL
 let conversation = []; // full message history, so "dig deeper" and any
                         // future follow-ups share context with the API
+let busy = false; // guards against overlapping API calls / double-submits
+
+// ---- checks counter (persists across visits when storage is available) ----
+// Wrapped in try/catch because some embedded previews block storage. On a real
+// hosted site (like GitHub Pages) it works normally; if it's ever blocked, the
+// page still works, it just won't remember the count.
+function getCount(){
+  try { return Number(localStorage.getItem("rl_checks") || 0); } catch { return 0; }
+}
+function bumpCount(){
+  let n = getCount() + 1;
+  try { localStorage.setItem("rl_checks", String(n)); } catch {}
+  renderCount(n);
+  return n;
+}
+function renderCount(n){
+  const el = document.getElementById("check-count");
+  if (!el) return;
+  if (n > 0) {
+    el.textContent = n === 1 ? "1 check run" : `${n} checks run`;
+    el.classList.remove("hidden");
+  }
+}
+renderCount(getCount()); // show existing count on load
+
+// ---- earned badges (small, celebrate the habit, never a verdict) ----
+function sourceBadge(){
+  return `<div class="badge-earn source"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M5 7l1.5 1.5L9.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Source check done, the #1 fact-checker habit</div>`;
+}
+function lateralBadge(){
+  return `<div class="badge-earn lateral"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Lateral read complete, you checked it like a pro</div>`;
+}
 
 const REFLECTIONS = [
-  "A familiar name isn't the same as an independent one. The strongest sign a claim holds up is when sources that have no reason to agree still land in the same place.",
-  "That's the instinct worth trusting. When the loudest source for a claim is also the one who gains from you believing it, that's exactly when to slow down and see who independent backs it up.",
-  "An unfamiliar source isn't automatically wrong, but it's automatically worth a ten-second look. Leave the page and search the source's name to see what others say about it.",
+  // 0: recognize, seems neutral
+  "Good catch, noticing the source at all puts you ahead of most readers. But recognizing a name isn't the same as it being independent. The strongest sign a claim holds up is when sources that have no reason to agree still land in the same place. This is one useful data point, not a verdict.",
+  // 1: recognize, they'd benefit
+  "That instinct is exactly the one worth trusting, noticing when a source stands to gain from you believing something is one of the most useful skepticism skills there is. It doesn't mean the claim is false. It means it's worth checking whether anyone independent backs it up before you decide.",
+  // 2: never heard of them
+  "That's useful to know, and it's not automatically a red flag, plenty of legitimate niche sources are simply unfamiliar. It is worth a fast look, though: search the name and see what others say about them before deciding how much weight to give this.",
+  // 3: no source named
+  "This is one of the most common patterns in misleading claims: borrowing the authority of \"scientists\" or \"a new study\" without naming anyone you could actually check. That alone doesn't make it false. It does mean there's nothing yet to verify it against, which is worth knowing on its own.",
 ];
 
 function ck(){ return '<span class="ck"><svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6.5 5 9.5 10 3" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'; }
@@ -433,6 +491,12 @@ function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;",
 function safeUrl(url){
   try { const u = new URL(url); if (u.protocol === "https:" || u.protocol === "http:") return u.href; } catch {}
   return "#";
+}
+// Honest banner shown whenever the claim is or contains a link: the checker
+// can't open pages or know today's date, so the user is the eyes on the page.
+function linkNote(){
+  if (!inputHasLink) return "";
+  return `<p class="link-note"><strong>One honest note:</strong> this tool can't open links or see live pages, and it doesn't reliably know today's date. It'll coach you on how to check this, but you'll be the one who actually looks at what the page says.</p>`;
 }
 
 // ============================================================
@@ -449,16 +513,21 @@ document.querySelectorAll("[data-demo]").forEach(b=>{
 document.getElementById("check-btn").addEventListener("click", startCheck);
 
 async function startCheck(){
+  if (busy) return;
   const t = input.value.trim();
   if(!t){ input.focus(); return; }
   currentClaimText = t;
   conversation = [];
+  // Detect a link or a date-ish reference so we can be upfront about limits.
+  inputHasLink = /https?:\/\/|www\.|\b\w+\.(com|org|net|gov|edu|co|io|news)\b/i.test(t);
 
   if (!PROXY_BASE) {
     stage.innerHTML = `<div class="stage-card"><div class="err-box">This demo isn't connected to a live checker yet, PROXY_BASE is empty in the page's script. (If you're the site owner: paste your deployed proxy URL into PROXY_BASE near the top of index.html.)</div></div>`;
     return;
   }
 
+  bumpCount(); // count the check only once it actually starts
+  busy = true;
   stage.innerHTML = `<div class="stage-card"><span class="badge scan"><span class="spin"></span>Scanning</span><p style="margin:8px 0 0;font-size:13.5px;color:var(--quiet)">Looking for existing fact-checks…</p></div>`;
 
   let hits = [];
@@ -468,10 +537,12 @@ async function startCheck(){
     hits = Array.isArray(data.hits) ? data.hits : [];
   } catch (err) {
     console.warn("Fact-check lookup failed, continuing to tier 1:", err);
+  } finally {
+    busy = false;
   }
 
   if (hits.length) renderTier0(hits);
-  else renderTier1();
+  else renderTier1("nohits");
 }
 
 // ============================================================
@@ -487,27 +558,37 @@ function renderTier0(hits){
   stage.innerHTML = `
     <div class="stage-card">
       <span class="badge">Already checked</span>
+      ${linkNote()}
       <p style="margin:0 0 12px;font-size:13.5px">Fact-checkers have already looked at this. Here's what they found:</p>
       ${cards}
-      <p class="restraint">Scan these before deciding. Click the one whose source you'd actually trust, and read past the rating to the reasoning.</p>
+      <p class="restraint">Scan these before deciding. See if they agree with each other, and read past the rating to the reasoning.</p>
       <div class="beat">${ck()} Answered in a second. No rabbit hole required.</div>
-      <div class="next-row"><button class="btn-ghost" onclick="renderTier1()">None of these match my claim</button></div>
+      <div class="next-row"><button class="btn-ghost" onclick="renderTier1('nomatch')">I want to dig deeper</button></div>
     </div>`;
 }
 
 // ============================================================
 // TIER 1 — the one question
 // ============================================================
-window.renderTier1 = function(){
+window.renderTier1 = function(reason){
+  const leadIn =
+    reason === "nohits"
+      ? `<p class="t1-leadin">A quick scan couldn't find a published fact-check matching this claim. That doesn't tell us whether it's true or false, only that this one quick check came up empty. Here's a fast next move:</p>`
+      : reason === "nomatch"
+      ? `<p class="t1-leadin">Good call, digging deeper provides more context. Let's look at who's actually behind this claim.</p>`
+      : "";
   stage.innerHTML = `
     <div class="stage-card">
       <span class="badge q">The one question</span>
+      ${linkNote()}
+      ${leadIn}
       <p class="q-big">Do you recognize who's behind this, and would they benefit from you believing it?</p>
-      <p class="q-sub">It's what fact-checkers ask first.</p>
+      <p class="q-sub">It's what fact-checkers ask first. Your answer adds context, it doesn't settle anything on its own.</p>
       <div class="opts" id="opts">
         <button class="opt" data-o="0">I recognize them, and they seem neutral here</button>
         <button class="opt" data-o="1">I recognize them, but they'd benefit from this being true</button>
         <button class="opt" data-o="2">Never heard of them</button>
+        <button class="opt" data-o="3">No specific person or outlet is named, just "scientists say" or a vague reference</button>
       </div>
       <div id="t1-after"></div>
     </div>`;
@@ -517,10 +598,11 @@ window.renderTier1 = function(){
       o.classList.add("picked");
       const i = Number(o.dataset.o);
       document.getElementById("t1-after").innerHTML = `
+        ${sourceBadge()}
         <div class="reflection">${REFLECTIONS[i]}</div>
-        <div class="beat">${ck()} Call made in about 10 seconds. That's the fast path working.</div>
+        <div class="beat">${ck()} Logged in about 10 seconds, one useful data point, not a verdict.</div>
         <div class="next-row">
-          <button class="btn-solid" onclick="startDeepCheck()">Still not sure? Dig deeper</button>
+          <button class="btn-solid" onclick="startDeepCheck()">Go deeper</button>
           <button class="btn-ghost" onclick="stage.innerHTML=''">That's enough, I've got a read on it</button>
         </div>`;
     });
@@ -531,6 +613,8 @@ window.renderTier1 = function(){
 // TIER 2 — the real deep dive (calls Claude via the proxy)
 // ============================================================
 window.startDeepCheck = async function(){
+  if (busy) return;
+  busy = true;
   conversation = [{
     role: "user",
     content: "Run a Credibility Check on the following input:\n\n" + JSON.stringify({ userClaim: currentClaimText }, null, 2),
@@ -545,7 +629,9 @@ window.startDeepCheck = async function(){
   } catch (err) {
     console.error(err);
     stage.innerHTML = `<div class="stage-card"><div class="err-box">${escapeHtml(friendlyError(err))}</div>
-      <div class="next-row"><button class="btn-ghost" onclick="renderTier1()">Back</button></div></div>`;
+      <div class="next-row"><button class="btn-ghost" onclick="renderTier1('nomatch')">Back to the question</button></div></div>`;
+  } finally {
+    busy = false;
   }
 };
 
@@ -580,7 +666,7 @@ function friendlyError(err){
 
 const FINDING_OPTIONS = [
   ["Checks out", "Thin or hidden", "Couldn't tell"],
-  ["Found the original", "Traces to something weaker", "Couldn't trace it"],
+  ["Found the original", "Traces back to a weaker source", "Couldn't trace it"],
   ["Multiple independent sources", "Only this source", "Mixed"],
 ];
 const FINDING_FRAGMENTS = [
@@ -592,11 +678,15 @@ const FINDING_FRAGMENTS = [
 function renderTier2(data){
   const pillars = Array.isArray(data.pillars) ? data.pillars.slice(0,3) : [];
   const findings = [null, null, null];
+  const opening = (data.opening || "").trim();
+  const closing = (data.closing || "").trim();
 
   let html = `<div class="stage-card">
+    ${linkNote()}
     <div class="t2-claimbox"><p>${escapeHtml(data.claim || currentClaimText)}</p></div>
-    <p class="t2-opening">${escapeHtml(data.opening || "")}</p>
+    ${opening ? `<p class="t2-opening">${escapeHtml(opening)}</p>` : ""}
     <p class="t2-restraint"><strong>Click restraint:</strong> scan the whole results page before clicking anything, then choose deliberately.</p>
+    <p class="p-progress" id="p-progress">Work through the moves below, tap what you find at each.</p>
     <div id="p2-list"></div>
     <div class="t2-verdict" id="t2-verdict"></div>`;
 
@@ -609,7 +699,7 @@ function renderTier2(data){
       tools.map(t => `<li><a href="${escapeHtml(safeUrl(t.url))}" target="_blank" rel="noopener" style="color:var(--teal-d)">${escapeHtml(t.name||"")}</a>: ${escapeHtml(t.why||"")}</li>`).join("") +
       `</ul></div>`;
   }
-  html += `<p class="t2-closing">${escapeHtml(data.closing || "")}</p>
+  html += `${closing ? `<p class="t2-closing">${escapeHtml(closing)}</p>` : ""}
     <div class="next-row" style="margin-top:14px"><button class="btn-ghost" onclick="stage.innerHTML=''">Done</button></div>
   </div>`;
   stage.innerHTML = html;
@@ -643,6 +733,11 @@ function buildPillar2(pillar, index, findings){
       btn.classList.add("picked");
       wrap.classList.add("done");
       findings[index] = Number(btn.dataset.o);
+      const done = findings.filter(f => f !== null).length;
+      const prog = document.getElementById("p-progress");
+      if (prog) prog.textContent = done < 3
+        ? `${done} of 3 moves checked, keep going.`
+        : "All 3 moves checked. Here's what you turned up:";
       maybeShowVerdict(findings);
     });
   });
@@ -652,14 +747,17 @@ function buildPillar2(pillar, index, findings){
 function maybeShowVerdict(findings){
   const box = document.getElementById("t2-verdict");
   if (!box || findings.some(f => f === null)) return;
-  const sentence = "You found: " +
+  const sentence =
+    "Here's what your own checking turned up: " +
     FINDING_FRAGMENTS[0][findings[0]] + ", " +
     FINDING_FRAGMENTS[1][findings[1]] + ", and " +
-    FINDING_FRAGMENTS[2][findings[2]] + ".";
-  box.textContent = sentence;
+    FINDING_FRAGMENTS[2][findings[2]] +
+    ". You've now got a real basis for your own judgment, which is the whole point.";
+  // Deliberately neutral styling: no green/red. The tool never renders a
+  // verdict, so the summary box shouldn't imply one by color. A single teal
+  // accent marks "you completed the process," not "the claim is true."
+  box.innerHTML = `${lateralBadge()}<span>${escapeHtml(sentence)}</span>`;
   box.style.display = "block";
-  const avg = findings.reduce((a,f)=>a + [80,20,50][f], 0) / 3;
-  box.style.borderLeft = "4px solid " + (avg >= 60 ? "#2E6E63" : avg <= 35 ? "#A9584F" : "#DDE4DF");
 }
 </script>
 </body>
