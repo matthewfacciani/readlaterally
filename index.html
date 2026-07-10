@@ -416,13 +416,16 @@
 <footer>
   <div class="wrap">
     <div>Built by <a href="https://matthewfacciani.com" target="_blank" rel="noopener">Matthew Facciani, PhD</a>, author of <i>Misguided</i>.</div>
-    <div class="fnote">Grounded in lateral-reading research (Wineburg &amp; McGrew, 2019; Kozyreva et al., 2023). This is a demo mockup; the check box uses sample data.</div>
+    <div class="fnote">Grounded in lateral-reading research (Wineburg &amp; McGrew, 2019; Kozyreva et al., 2023). Checks run through a small private server so no keys live in this page. Nothing you check is stored.</div>
   </div>
 </footer>
 
 <script>
-// ================== thanks for trying out my tool :) ==========================================
-const PROXY_BASE = "https://lrc-proxy.vercel.app";
+// ============================================================
+// CONFIG — the one line you fill in after deploying the proxy.
+// Example: "https://read-laterally-proxy.vercel.app"
+// ============================================================
+const PROXY_BASE = ""; // ← paste your deployed Vercel URL here (no trailing slash)
 
 // ============================================================
 // State
@@ -488,6 +491,23 @@ function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;",
 function safeUrl(url){
   try { const u = new URL(url); if (u.protocol === "https:" || u.protocol === "http:") return u.href; } catch {}
   return "#";
+}
+// One-click search URLs may only point at search/verification services —
+// never at a page that would hand the user a conclusion. The prompt enforces
+// this, and this allowlist enforces it again locally (same list as the
+// extension's sidepanel.js — keep them in sync).
+const SEARCH_HOSTS = [
+  "google.com","news.google.com","scholar.google.com","toolbox.google.com",
+  "lens.google.com","wikipedia.org","tineye.com","web.archive.org","archive.org",
+];
+function safeSearchUrl(url){
+  try {
+    const u = new URL(url);
+    if (u.protocol !== "https:") return null;
+    const host = u.hostname.replace(/^www\./, "");
+    if (SEARCH_HOSTS.some(d => host === d || host.endsWith("." + d))) return u.href;
+  } catch {}
+  return null;
 }
 // Honest banner shown whenever the claim is or contains a link: the checker
 // can't open pages or know today's date, so the user is the eyes on the page.
@@ -710,9 +730,12 @@ function buildPillar2(pillar, index, findings){
   wrap.className = "pillar2";
   const marker = `<span class="p-marker"><svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6.5 5 9.5 10 3" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
   const searches = Array.isArray(pillar.searches) ? pillar.searches.slice(0,3) : [];
-  const searchHtml = searches.filter(s=>s.url && s.label).map(s =>
-    `<a class="p-search-btn" href="${escapeHtml(safeUrl(s.url))}" target="_blank" rel="noopener">${escapeHtml(s.label)}</a>`
-  ).join("");
+  const searchHtml = searches
+    .map(s => ({ label: s.label, url: safeSearchUrl(s.url) }))
+    .filter(s => s.url && s.label)
+    .map(s =>
+      `<a class="p-search-btn" href="${escapeHtml(s.url)}" target="_blank" rel="noopener">${escapeHtml(s.label)}</a>`
+    ).join("");
   const tapHtml = (FINDING_OPTIONS[index]||[]).map((label,o) =>
     `<button class="p-tap" data-i="${index}" data-o="${o}">${escapeHtml(label)}</button>`
   ).join("");
