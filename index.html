@@ -114,8 +114,11 @@
   .fc{border:1px solid var(--line); border-left:4px solid var(--line); border-radius:9px;
     padding:11px 13px; margin-bottom:9px; text-decoration:none; color:var(--ink); display:block;}
   .fc:hover{border-color:var(--teal);}
-  .fc-rating{font-weight:700; font-size:13px; margin:0 0 3px;}
-  .fc-claim{margin:0 0 5px; font-size:13.5px;}
+  .fc-rating{font-weight:700; font-size:13.5px; margin:0 0 3px;}
+  /* The claim is the thing being RATED, not the fact-checker's explanation.
+     It's labelled and italicised so it doesn't read as detail about the rating. */
+  .fc-claim{margin:0 0 5px; font-size:13px;}
+  .fc-claim .fc-lbl{color:var(--quiet); font-weight:600; font-style:normal;}
   .fc-pub{margin:0; font-size:11.5px; color:var(--quiet);}
   .fc-pub::after{content:" \2197";}
 
@@ -279,7 +282,7 @@
 
     <span class="eyebrow"><span class="dot"></span>A lateral reading companion</span>
     <h1>Read <span class="lat">Laterally</span>.<br>Check it in seconds.</h1>
-    <p class="lede">Many claims are already fact-checked: you just haven't looked yet. Paste anything below. We check if it's already been debunked, then guide you through <b>who's behind it, where it started, and who else is saying it</b>. No verdict handed to you.</p>
+    <p class="lede">Most claims are already fact-checked: you just haven't looked yet. Paste anything below. We check if it's already been debunked, then guide you through <b>who's behind it, where it started, and who else is saying it</b>. No verdict handed to you.</p>
 
     <!-- interactive checker -->
     <div class="checker">
@@ -343,7 +346,7 @@
     <div class="analogy">
       <p class="kicker">The idea, in one picture</p>
       <p class="analogy-lead">You wouldn't trust a stranger just because they told you they're trustworthy. You'd <b>ask around about them.</b></p>
-      <p class="analogy-sub">Lateral reading is asking around about a website. You leave the page to see what <em>others</em> say, instead of judging it by how it looks.</p>
+      <p class="analogy-sub">Lateral reading is asking around about a website — leaving it to see what <em>others</em> say, instead of judging it by how it looks.</p>
 
       <div class="analogy-fig">
         <svg viewBox="0 0 640 300" role="img" aria-label="Vertical reading stays on one page and reads it top to bottom. Lateral reading leaves the page and opens new tabs to ask other sources about it.">
@@ -530,7 +533,7 @@
 <footer>
   <div class="wrap">
     <div>Built by <a href="https://matthewfacciani.com" target="_blank" rel="noopener">Matthew Facciani, PhD</a>, author of <i>Misguided</i>.</div>
-    <div class="fnote"> Nothing you paste here is stored, logged, or seen by me. Checks run through a small private server, so no keys live in this page and no copy is kept. </div>
+    <div class="fnote">Grounded in lateral-reading research (Wineburg &amp; McGrew, 2019; Kozyreva et al., 2023). Checks run through a small private server so no keys live in this page. Nothing you check is stored.</div>
   </div>
 </footer>
 
@@ -683,7 +686,7 @@ function renderTier0(hits){
   const cards = hits.map(h => `
     <a class="fc" href="${escapeHtml(safeUrl(h.url))}" target="_blank" rel="noopener" style="border-left-color:${ratingColor(h.rating)}">
       <p class="fc-rating">${escapeHtml(h.rating || "Rated")}</p>
-      <p class="fc-claim">${escapeHtml(h.text || "(see fact-check)")}</p>
+      <p class="fc-claim"><span class="fc-lbl">Claim checked:</span> <em>${escapeHtml(h.text || "(see fact-check)")}</em></p>
       <p class="fc-pub">${escapeHtml(h.publisher || "")}</p>
     </a>`).join("");
   stage.innerHTML = `
